@@ -9,11 +9,6 @@ buildscript {
     }
 }
 
-plugins {
-    id 'jacoco'
-    id 'com.github.kt3k.coveralls' version '2.6.3'
-}
-
 group 'nice.fontaine'
 version '0.0.1'
 
@@ -24,13 +19,6 @@ sourceCompatibility = 1.8
 
 repositories {
     mavenCentral()
-}
-
-jacocoTestReport {
-    reports {
-        xml.enabled = true // coveralls plugin depends on xml format report
-        html.enabled = true
-    }
 }
 
 dependencies {
