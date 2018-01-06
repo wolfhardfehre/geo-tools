@@ -10,8 +10,8 @@ buildscript {
 }
 
 plugins {
-    id 'net.saliman.cobertura' version '2.3.1'
-    id 'com.github.kt3k.coveralls' version '2.8.2'
+    id 'jacoco'
+    id 'com.github.kt3k.coveralls' version '2.6.3'
 }
 
 group 'nice.fontaine'
@@ -26,10 +26,11 @@ repositories {
     mavenCentral()
 }
 
-cobertura.coverageFormats = ['html', 'xml']
-
-tasks.coveralls {
-    dependsOn 'check'
+jacocoTestReport {
+    reports {
+        xml.enabled = true // coveralls plugin depends on xml format report
+        html.enabled = true
+    }
 }
 
 dependencies {
