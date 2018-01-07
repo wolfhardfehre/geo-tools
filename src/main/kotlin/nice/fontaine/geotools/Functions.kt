@@ -1,4 +1,4 @@
-package nice.fontaine
+package nice.fontaine.geotools
 
 import kotlin.math.asin
 import kotlin.math.cos

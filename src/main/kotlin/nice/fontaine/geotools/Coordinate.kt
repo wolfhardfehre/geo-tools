@@ -1,4 +1,4 @@
-package nice.fontaine
+package nice.fontaine.geotools
 
 data class Coordinate(val lat: Double, val lon: Double) {
 

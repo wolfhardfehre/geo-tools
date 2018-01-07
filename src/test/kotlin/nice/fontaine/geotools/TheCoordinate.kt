@@ -1,4 +1,4 @@
-package nice.fontaine
+package nice.fontaine.geotools
 
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Before
