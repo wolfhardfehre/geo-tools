@@ -1,8 +1,12 @@
 package nice.fontaine.geotools
 
 import org.assertj.core.api.Assertions.assertThat
+import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.Before
 import org.junit.Test
+import org.junit.internal.matchers.ThrowableMessageMatcher.hasMessage
+
+
 
 class TheCoordinate {
 
@@ -42,5 +46,25 @@ class TheCoordinate {
         val to = Coordinate(lat, lon)
 
         assertThat(from == to).isTrue()
+    }
+
+    @Test fun `should throw exception when latitude is lower -90 degrees`() {
+        assertThatThrownBy { Coordinate(-90.1, 0.0) }
+                .hasMessage("Latitude is invalid!")
+    }
+
+    @Test fun `should throw exception when latitude is higher 90 degrees`() {
+        assertThatThrownBy { Coordinate(90.1, 0.0) }
+                .hasMessage("Latitude is invalid!")
+    }
+
+    @Test fun `should throw exception when longitude is lower -180 degrees`() {
+        assertThatThrownBy { Coordinate(0.0, -180.1) }
+                .hasMessage("Longitude is invalid!")
+    }
+
+    @Test fun `should throw exception when longitude is higher 180 degrees`() {
+        assertThatThrownBy { Coordinate(0.0, 180.1) }
+                .hasMessage("Longitude is invalid!")
     }
 }
