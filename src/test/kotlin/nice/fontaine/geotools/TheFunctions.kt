@@ -14,9 +14,27 @@ class TheFunctions {
         to = Coordinate(2.0, 0.0)
     }
 
-    @Test fun `should compute distance in meters between two coordinates`() {
+    @Test fun `should compute distance in meters using haversine formula`() {
         val actual = meters(from, to)
 
-        assertThat(actual).isEqualTo(111195.0802335329)
+        assertThat(actual).isEqualTo(111_195.0802335329)
+    }
+
+    @Test fun `should compute distance in meters using equirectangular approximation`() {
+        val actual = metersApprox(from, to)
+
+        assertThat(actual).isEqualTo(111_195.0802335329)
+    }
+
+    @Test fun `should compute pythagoras distance`() {
+        val actual = pythagoras(3.0, 4.0)
+
+        assertThat(actual).isEqualTo(5.0)
+    }
+
+    @Test fun `should compute haversine of x`() {
+        val actual = hav(Math.PI)
+
+        assertThat(actual).isEqualTo(1.0)
     }
 }
