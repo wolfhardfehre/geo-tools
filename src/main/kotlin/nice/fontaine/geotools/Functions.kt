@@ -1,9 +1,7 @@
 package nice.fontaine.geotools
 
-import kotlin.math.asin
-import kotlin.math.cos
-import kotlin.math.sin
-import kotlin.math.sqrt
+import java.lang.Math.toDegrees
+import kotlin.math.*
 
 const val EARTH_RADIUS = 6_371_008.8
 
@@ -32,8 +30,8 @@ fun angle(from: Coordinate, to: Coordinate) = 2 * asin(sqrt(havDistance(from, to
  * @param   to Coordinate
  * @return  haversine havDistance
  */
-fun havDistance(from: Coordinate, to: Coordinate) = hav(to.latRad() - from.latRad()) +
-        cos(from.latRad()) * cos(to.latRad()) * hav(to.lonRad() - from.lonRad())
+fun havDistance(from: Coordinate, to: Coordinate) =
+        hav(deltaLat(from, to)) + cos(from.latRad()) * cos(to.latRad()) * hav(deltaLon(from, to))
 
 /**
  * Computes the haversine of a given value.
@@ -55,8 +53,8 @@ fun hav(x: Double): Double {
  * @return  havDistance in meters
  */
 fun metersApprox(from: Coordinate, to: Coordinate): Double {
-    val x = (to.lonRad() - from.lonRad()) * cos((from.latRad() + to.latRad()) / 2)
-    val y = to.latRad() - from.latRad()
+    val x = deltaLon(from, to) * cos((from.latRad() + to.latRad()) / 2)
+    val y = deltaLat(from, to)
     return EARTH_RADIUS * pythagoras(x, y)
 }
 
@@ -68,3 +66,22 @@ fun metersApprox(from: Coordinate, to: Coordinate): Double {
  * @return  havDistance between coordinates
  */
 fun pythagoras(x: Double, y: Double) = sqrt(x * x + y * y)
+
+/**
+ * Initial bearing (also: forward azimuth) which if followed in a straight line
+ * along a great-circle arc (also: orthodrome) will take you from the start point to the end point.
+ *
+ * @param   from Coordinate
+ * @param   to Coordinate
+ * @return  bearing in degrees at start point
+ */
+fun bearing(from: Coordinate, to: Coordinate): Double {
+    val delta = deltaLon(from, to)
+    val y = sin(delta) * cos(to.latRad())
+    val x = cos(from.latRad()) * sin(to.latRad()) - sin(from.latRad()) * cos(to.latRad()) * cos(delta)
+    return toDegrees(atan2(y, x))
+}
+
+private fun deltaLon(from: Coordinate, to: Coordinate) = to.lonRad() - from.lonRad()
+
+private fun deltaLat(from: Coordinate, to: Coordinate) = to.latRad() - from.latRad()

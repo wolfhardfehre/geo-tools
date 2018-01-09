@@ -37,4 +37,14 @@ class TheFunctions {
 
         assertThat(actual).isEqualTo(1.0)
     }
+
+    @Test fun `should compute initial bearing`() {
+        var actual = bearing(from, to)
+
+        assertThat(actual).isEqualTo(0.0)
+
+        actual = bearing(to, from)
+
+        assertThat(actual).isEqualTo(180.0)
+    }
 }
