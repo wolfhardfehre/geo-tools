@@ -18,9 +18,7 @@ or Gradle:
 
 ```groovy
 repositories {
-     maven {
-         url  "https://dl.bintray.com/anorak/geo-tools"
-     }
+     jcenter()
  }
 ```
 
