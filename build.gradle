@@ -22,7 +22,7 @@ apply plugin: 'maven-publish'
 ext {
     groupId = 'nice.fontaine'
     artifactId = 'geo-tools'
-    libVersion = '0.0.2'
+    libVersion = '0.0.3'
 }
 
 group = groupId
