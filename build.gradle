@@ -6,15 +6,27 @@ buildscript {
     }
     dependencies {
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+        classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:1.7.3'
     }
 }
 
-group 'nice.fontaine'
-version '0.0.2'
+plugins {
+    id "com.jfrog.bintray" version "1.7.3"
+}
 
 apply plugin: 'java'
 apply plugin: 'kotlin'
 apply plugin: 'jacoco'
+apply plugin: 'maven-publish'
+
+ext {
+    groupId = 'nice.fontaine'
+    artifactId = 'geo-tools'
+    libVersion = '0.0.2'
+}
+
+group = groupId
+version = libVersion
 
 sourceCompatibility = 1.8
 
@@ -33,6 +45,52 @@ compileKotlin {
 }
 compileTestKotlin {
     kotlinOptions.jvmTarget = "1.8"
+}
+
+bintray {
+    user = BINTRAY_USER
+    key = BINTRAY_KEY
+    publications = ['mavenJava']
+
+    pkg {
+        repo = artifactId
+        name = artifactId
+        licenses = ['Apache-2.0']
+        vcsUrl = 'https://github.com/wolfhardfehre/geo-tools.git'
+        version {
+            name = libVersion
+            desc = 'Toolbox for GEO functions'
+            released = new Date()
+        }
+    }
+}
+
+task sourcesJar(type: Jar, dependsOn: project.classes) {
+    from sourceSets.main.allSource
+}
+
+task javadocJar(type: Jar, dependsOn: project.javadoc) {
+    from javadoc.destinationDir
+}
+
+artifacts {
+    archives sourcesJar, javadocJar
+}
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            artifactId artifactId
+            from components.java
+
+            artifact sourcesJar {
+                classifier = 'sources'
+            }
+            artifact javadocJar {
+                classifier = 'javadoc'
+            }
+        }
+    }
 }
 
 jacocoTestReport {

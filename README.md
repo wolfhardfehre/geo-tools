@@ -26,6 +26,12 @@ repositories {
 compile 'nice.fontaine:geo-tools:0.0.1'
 ```
 
+## Publish
+
+As explained [here](https://github.com/bintray/gradle-bintray-plugin)
+
+    $ ./gradlew bintrayUpload
+
 # License
 
 ```
