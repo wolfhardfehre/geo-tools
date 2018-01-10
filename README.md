@@ -10,7 +10,7 @@ Grab it via Maven:
 <dependency>
   <groupId>nice.fontaine</groupId>
   <artifactId>geo-tools</artifactId>
-  <version>0.0.1</version>
+  <version>{version}</version>
   <type>pom</type>
 </dependency>
 ```
@@ -23,7 +23,7 @@ repositories {
 ```
 
 ```groovy
-compile 'nice.fontaine:geo-tools:0.0.1'
+compile 'nice.fontaine:geo-tools:{version}'
 ```
 
 ## Publish
