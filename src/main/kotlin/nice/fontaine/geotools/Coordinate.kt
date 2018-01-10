@@ -4,16 +4,18 @@ data class Coordinate(val lat: Double, val lon: Double) {
 
     init { validate() }
 
-    fun latRad(): Double = Math.toRadians(lat)
+    infix fun metersTo(other: Coordinate): Double = meters(this, other)
 
-    fun lonRad(): Double = Math.toRadians(lon)
+    infix fun approxTo(other: Coordinate): Double = approx(this, other)
 
-    fun metersTo(other: Coordinate): Double = meters(this, other)
+    infix fun bearingTo(other: Coordinate): Double = bearing(this, other)
+
+    infix fun midpointTo(other: Coordinate): Coordinate = midpoint(this, other)
 
     private fun validate() {
-        if (lat <= -90.0) throw IllegalArgumentException("Latitude is invalid!")
-        if (lat >= 90.0) throw IllegalArgumentException("Latitude is invalid!")
-        if (lon <= -180.0) throw IllegalArgumentException("Longitude is invalid!")
-        if (lon >= 180.0) throw IllegalArgumentException("Longitude is invalid!")
+        if (lat <= -90.0) throw IllegalArgumentException("Latitude $lat is invalid!")
+        if (lat >= 90.0) throw IllegalArgumentException("Latitude $lat is invalid!")
+        if (lon <= -180.0) throw IllegalArgumentException("Longitude $lon is invalid!")
+        if (lon >= 180.0) throw IllegalArgumentException("Longitude $lon is invalid!")
     }
 }

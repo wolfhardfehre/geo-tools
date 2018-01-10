@@ -1,16 +1,20 @@
 package nice.fontaine.geotools
 
-import java.lang.Math.toDegrees
 import kotlin.math.*
 
 const val EARTH_RADIUS = 6_371_008.8
 
 /**
- * Computes havDistance between two Coordinates in meters using haversine.
+ * Computes distance in meters between two Coordinates using haversine formula.
  *
  * @param   from Coordinate
  * @param   to Coordinate
  * @return  havDistance in meters
+ *
+ * @example
+ *     val from = Coordinate(52.205, 0.119)
+ *     val to = Coordinate(48.857, 2.351)
+ *     val d = meters(from, to)              // ~ 404.3 km
  */
 fun meters(from: Coordinate, to: Coordinate) = EARTH_RADIUS * angle(from, to)
 
@@ -24,14 +28,18 @@ fun meters(from: Coordinate, to: Coordinate) = EARTH_RADIUS * angle(from, to)
 fun angle(from: Coordinate, to: Coordinate) = 2 * asin(sqrt(havDistance(from, to)))
 
 /**
- * Computes haversine havDistance between two Coordinates.
+ * Computes haversine distance between two Coordinates.
  *
  * @param   from Coordinate
  * @param   to Coordinate
- * @return  haversine havDistance
+ * @return  haversine distance
  */
-fun havDistance(from: Coordinate, to: Coordinate) =
-        hav(deltaLat(from, to)) + cos(from.latRad()) * cos(to.latRad()) * hav(deltaLon(from, to))
+private fun havDistance(from: Coordinate, to: Coordinate):Double {
+    val fromLat = from.lat.rad()
+    val toLat = to.lat.rad()
+    val delta = deltaLon(from.lon, to.lon)
+    return hav(delta(fromLat, toLat)) + cos(fromLat) * cos(toLat) * hav(delta)
+}
 
 /**
  * Computes the haversine of a given value.
@@ -45,16 +53,19 @@ fun hav(x: Double): Double {
 }
 
 /**
- * Computes havDistance between coordinates using Pythagoras’ theorem on an equi­rectangular projection.
+ * Computes distance approximation between coordinates using Pythagoras’ theorem on an equi­rectangular projection.
  * Should be used if performance is an issue and accuracy less important, for small distances.
  *
  * @param   from Coordinate
  * @param   to Coordinate
  * @return  havDistance in meters
  */
-fun metersApprox(from: Coordinate, to: Coordinate): Double {
-    val x = deltaLon(from, to) * cos((from.latRad() + to.latRad()) / 2)
-    val y = deltaLat(from, to)
+fun approx(from: Coordinate, to: Coordinate): Double {
+    val fromLat = from.lat.rad()
+    val toLat = to.lat.rad()
+    val delta = deltaLon(from.lon, to.lon)
+    val x = delta * cos((fromLat + toLat) / 2)
+    val y = delta(fromLat, toLat)
     return EARTH_RADIUS * pythagoras(x, y)
 }
 
@@ -68,20 +79,86 @@ fun metersApprox(from: Coordinate, to: Coordinate): Double {
 fun pythagoras(x: Double, y: Double) = sqrt(x * x + y * y)
 
 /**
+ * Returns the (initial) bearing from origin to destination coordinate.
  * Initial bearing (also: forward azimuth) which if followed in a straight line
  * along a great-circle arc (also: orthodrome) will take you from the start point to the end point.
  *
  * @param   from Coordinate
  * @param   to Coordinate
- * @return  bearing in degrees at start point
+ * @return  Initial bearing in degrees from north.
+ *
+ * @example
+ *     val from = Coordinate(52.205, 0.119)
+ *     val to = Coordinate(48.857, 2.351)
+ *     val b = bearing(from, to)            // ~ 156.2°
  */
 fun bearing(from: Coordinate, to: Coordinate): Double {
-    val delta = deltaLon(from, to)
-    val y = sin(delta) * cos(to.latRad())
-    val x = cos(from.latRad()) * sin(to.latRad()) - sin(from.latRad()) * cos(to.latRad()) * cos(delta)
-    return toDegrees(atan2(y, x))
+    val fromLat = from.lat.rad()
+    val toLat = to.lat.rad()
+    val delta = deltaLon(from.lon, to.lon)
+    val y = sin(delta) * cos(toLat)
+    val x = cos(fromLat) * sin(toLat) - sin(fromLat) * cos(toLat) * cos(delta)
+    return (atan2(y, x).deg() + 360) % 360
 }
 
-private fun deltaLon(from: Coordinate, to: Coordinate) = to.lonRad() - from.lonRad()
+/**
+ * Returns final bearing arriving at destination from origin. The final bearing
+ * will differ from the initial bearing by varying degrees according to distance and latitude.
+ *
+ * @param   from Coordinate
+ * @param   to Coordinate
+ * @return Final bearing in degrees from north.
+ *
+ * @example
+ *     val from = Coordinate(52.205, 0.119)
+ *     val to = Coordinate(48.857, 2.351)
+ *     val b = finalBearing(from, to)       // ~ 157.9°
+ */
+fun finalBearing(from: Coordinate, to: Coordinate): Double {
+    return (bearing(to, from) + 180) % 360
+}
 
-private fun deltaLat(from: Coordinate, to: Coordinate) = to.latRad() - from.latRad()
+/**
+ * Half-way point along a great circle path between the two points.
+ *
+ * @param   from Coordinate
+ * @param   to Coordinate
+ * @return  Coordinate of midpoint
+ *
+ * @example
+ *     val from = Coordinate(52.205, 0.119)
+ *     val to = Coordinate(48.857, 2.351)
+ *     val mid = midpoint(from, to)        // ~ 50.5363°N 1.2746°E
+ */
+fun midpoint(from: Coordinate, to: Coordinate): Coordinate {
+    val fromLat = from.lat.rad()
+    val toLat = to.lat.rad()
+    val delta = deltaLon(from.lon, to.lon)
+    val cosToLat = cos(toLat)
+    val by = cosToLat * sin(delta)
+    val y = sin(fromLat) + sin(toLat)
+    val cosFromLatBx = cos(fromLat) + cosToLat * cos(delta)
+    val lat = atan2(y, pythagoras(cosFromLatBx, by)).deg()
+    val lon = (from.lon.rad() + atan2(by, cosFromLatBx)).deg()
+    return Coordinate(lat, (lon + 540) % 360 - 180)
+}
+
+/**
+ * Converts degrees to radians.
+ *
+ * @return radians
+ */
+fun Double.rad() = this / 180.0 * PI
+
+/**
+ * Converts radians to degrees.
+ *
+ * @return degrees
+ */
+fun Double.deg() = this * 180.0 / PI
+
+private fun delta(from: Double, to: Double) = to - from
+
+private fun deltaLon(from: Double, to: Double) = (to - from).rad()
+
+
