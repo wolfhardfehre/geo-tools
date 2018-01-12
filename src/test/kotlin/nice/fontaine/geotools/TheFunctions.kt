@@ -105,4 +105,15 @@ class TheFunctions {
 
         assertThat(actual).isEqualTo(expected)
     }
+
+    @Test fun `should compute intermediate at fraction between two coordinates`() {
+        val expected = Coordinate(51.37208385546635, 0.7073371009198581)
+        val from = Coordinate(52.205, 0.119)
+        val to = Coordinate(48.857, 2.351)
+        val fraction = 0.25
+
+        val actual = intermediate(from, to, fraction)
+
+        assertThat(actual).isEqualTo(expected)
+    }
 }

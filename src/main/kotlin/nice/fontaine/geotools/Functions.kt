@@ -144,6 +144,52 @@ fun midpoint(from: Coordinate, to: Coordinate): Coordinate {
 }
 
 /**
+ * Intermediate coordinate at given fraction (normalize between 0 and 1) between two coordinates.
+ *
+ * @param   from Coordinate
+ * @param   to Coordinate
+ * @param   fraction Double
+ * @returns Coordinate as intermediate point between coordinates at a specified fraction (0: from -> 1: to).
+ *
+ * @example
+ *   val from = Coordinate(52.205, 0.119);
+ *   val to = Coordinate(48.857, 2.351);
+ *   val inter = intermediate(from, to, 0.25);   // ~ 51.3721°N, 0.7073°E
+ */
+fun intermediate(from: Coordinate, to: Coordinate, fraction: Double): Coordinate {
+    val fromLat = from.lat.rad()
+    val fromLon = from.lon.rad()
+    val toLat = to.lat.rad()
+    val toLon = to.lon.rad()
+    val sinFromLat = sin(fromLat)
+    val cosFromLat = cos(fromLat)
+    val sinFromLon = sin(fromLon)
+    val cosFromLon = cos(fromLon)
+    val sinToLat = sin(toLat)
+    val cosToLat = cos(toLat)
+    val sinToLon = sin(toLon)
+    val cosToLon = cos(toLon)
+
+    // distance between points
+    val deltaLat = toLat - fromLat
+    val deltaLon = toLon - fromLon
+    val haversine = hav(deltaLat) + cos(fromLat) * cos(toLat) * hav(deltaLon)
+    val sigma = 2 * atan2(sqrt(haversine), sqrt((1 - haversine)))
+
+    val a = sin((1 - fraction) * sigma) / sin(sigma)
+    val b = sin(fraction * sigma) / sin(sigma)
+
+    val x = a * cosFromLat * cosFromLon + b * cosToLat * cosToLon
+    val y = a * cosFromLat * sinFromLon + b * cosToLat * sinToLon
+    val z = a * sinFromLat + b * sinToLat
+
+    val lat = atan2(z, pythagoras(x, y))
+    val lon = atan2(y, x)
+
+    return Coordinate(lat.deg(), (lon.deg() + 540) % 360 - 180) // normalise lon to −180..+180°
+}
+
+/**
  * Converts degrees to radians.
  *
  * @return radians
